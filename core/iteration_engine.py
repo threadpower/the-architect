@@ -180,6 +180,24 @@ class IterationEngine:
         task.status = "complete"
         task.updated_at = datetime.utcnow()
 
+        # Save full artifacts to Redis for retrieval
+        import json as _json
+        for i, artifact in enumerate(artifacts):
+            artifact_key = f"architect:artifacts:{task.id}:{i}"
+            await self.redis.set(
+                artifact_key,
+                _json.dumps({
+                    "index": i,
+                    "provider": artifact.provider,
+                    "model": artifact.model,
+                    "content": artifact.content,
+                    "tokens_in": artifact.tokens_in,
+                    "tokens_out": artifact.tokens_out,
+                    "cost_usd": artifact.cost_usd,
+                }),
+                ex=86400 * 30  # Keep 30 days
+            )
+
         result = TaskResult(
             task_id=task.id,
             status="complete",
@@ -285,6 +303,8 @@ class IterationEngine:
                 "ready to ship", "well-structured", "solid work",
                 "no significant issues", "ready for deployment",
             ]
+            if "not approved" in text or "not ready" in text:
+                return False
             return any(signal in text for signal in approval_signals)
 
         elif task.iteration.convergence.value == "score_threshold":

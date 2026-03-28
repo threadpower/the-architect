@@ -39,7 +39,7 @@ class ClaudeBridge:
         task_id: str,
         system: Optional[str] = None,
         model: Optional[str] = None,
-        max_tokens: int = 4096,
+        max_tokens: int = 8192,
     ) -> ModelResponse:
         """Generate via Claude API. Pre-authorized and cost-tracked."""
 
