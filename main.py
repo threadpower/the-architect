@@ -30,6 +30,11 @@ from architect.bridges.local_bridge import OllamaBridge
 from architect.bridges.cloud_bridge import ClaudeBridge, GrokBridge
 from architect.utils.yaml_parser import parse_task_yaml
 
+import sys
+sys.path.insert(0, '/forge/lib')
+from sovereign_obs import safe_endpoint, get_logger, trace
+
+
 
 # ─── Application Lifespan ───────────────────────────────────
 redis_client: redis.Redis = None
@@ -105,6 +110,7 @@ app = FastAPI(
 # ─── Endpoints ───────────────────────────────────────────────
 
 @app.get("/health")
+@safe_endpoint
 async def health_check():
     """Platform health check."""
     ollama = OllamaBridge()
@@ -129,6 +135,7 @@ async def health_check():
 
 
 @app.post("/tasks")
+@safe_endpoint
 async def submit_task(task: Task):
     """Submit a new task via JSON body."""
     saved = await task_manager.submit(task)
@@ -143,6 +150,7 @@ async def submit_task(task: Task):
 
 
 @app.post("/tasks/yaml")
+@safe_endpoint
 async def submit_task_yaml(yaml_content: str):
     """Submit a task from YAML content (POST body as string)."""
     try:
@@ -161,6 +169,7 @@ async def submit_task_yaml(yaml_content: str):
 
 
 @app.post("/tasks/{task_id}/run")
+@safe_endpoint
 async def run_task(task_id: str):
     """Execute a submitted task through the iteration engine."""
     task = await task_manager.get(task_id)
@@ -191,6 +200,7 @@ async def run_task(task_id: str):
 
 
 @app.get("/tasks")
+@safe_endpoint
 async def list_tasks(status: Optional[str] = None, limit: int = 20):
     """List tasks, optionally filtered by status."""
     tasks = await task_manager.list_tasks(status=status, limit=limit)
@@ -212,6 +222,7 @@ async def list_tasks(status: Optional[str] = None, limit: int = 20):
 
 
 @app.get("/tasks/{task_id}")
+@safe_endpoint
 async def get_task(task_id: str):
     """Get full task details."""
     task = await task_manager.get(task_id)
@@ -221,6 +232,7 @@ async def get_task(task_id: str):
 
 
 @app.get("/tasks/{task_id}/log")
+@safe_endpoint
 async def get_task_log(task_id: str):
     """Get the event log for a task."""
     log = await task_manager.get_task_log(task_id)
@@ -228,6 +240,7 @@ async def get_task_log(task_id: str):
 
 
 @app.get("/budget")
+@safe_endpoint
 async def get_budget():
     """Today's budget report with savings tracking."""
     report = await budget.get_daily_report()
@@ -241,6 +254,7 @@ async def get_budget():
 
 
 @app.get("/guardrails")
+@safe_endpoint
 async def get_guardrails():
     """View active guardrails and integrity status."""
     integrity = await guardrails.verify_integrity()
