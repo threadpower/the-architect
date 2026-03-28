@@ -1,0 +1,48 @@
+task:
+  name: "Build Beacon Marketing Agent System Prompt"
+  description: |
+    Create a comprehensive system prompt for the Beacon agent
+    that handles Threadpower marketing, Squatch Mode product
+    intelligence, and social media content strategy.
+    
+    Beacon should understand:
+    - The four Squatch Mode series (Sovereign, Unplugged, Awakened, Founded)
+    - The six live designs (Ascended, Baked, Buzzed, Caffeinated, Pretty AF, Wizarded)
+    - The crosshatch ink style on heathered charcoal tees
+    - The "Wear the signal. Find the others." positioning
+    - The four pillars framework
+    - Signal Circle subscription concept ($39 founding / $49 standard)
+    
+    The system prompt should be deployable as IDENTITY.md for the 
+    Beacon Docker container on The Forge.
+  
+  type: document
+  priority: high
+  
+  models:
+    primary: claude
+    reviewer: grok
+    implementer: qwen-local
+  
+  iteration:
+    max_rounds: 3
+    convergence: reviewer_approved
+    human_checkpoint: true
+  
+  budget:
+    max_tokens_input: 50000
+    max_tokens_output: 20000
+    max_cost_usd: 2.00
+    prefer_local: false
+  
+  context:
+    files: []
+    memory_keys:
+      - threadpower_brand
+      - squatch_mode_products
+    web_search: false
+  
+  output:
+    format: markdown
+    save_to: /forge/agents/beacon/IDENTITY.md
+    notify: sms

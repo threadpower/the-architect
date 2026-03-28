@@ -1,0 +1,48 @@
+# The Architect — Docker Compose
+# Runs alongside existing Forge services (Ollama, Redis, NemoClaw)
+# Shares the Docker network for local communication
+
+version: "3.8"
+
+services:
+  architect:
+    build: .
+    container_name: architect-orchestrator
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./tasks:/app/tasks:ro
+      - ./modules:/app/modules:ro
+      - /forge:/forge  # Access to agent configs, repos, etc.
+    depends_on:
+      - redis
+    networks:
+      - forge-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+
+  redis:
+    image: redis:7-alpine
+    container_name: architect-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - architect-redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - forge-network
+    restart: unless-stopped
+
+volumes:
+  architect-redis-data:
+
+networks:
+  forge-network:
+    external: true  # Use existing Forge Docker network
+    name: forge-network
