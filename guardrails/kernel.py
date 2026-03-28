@@ -20,6 +20,7 @@ from typing import Optional
 import redis.asyncio as redis
 
 from architect.config.settings import settings
+from pydantic import BaseModel
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -283,6 +284,9 @@ class GuardrailKernel:
         return stored_hash.decode() == self.hash
 
 
+from pydantic import BaseModel
+
+
 class GuardrailCheck(BaseModel):
     """Result of a guardrail check."""
     approved: bool
@@ -290,7 +294,3 @@ class GuardrailCheck(BaseModel):
     rule: Optional[str] = None
     requires_human: bool = False
     guardrail_version: str = CORE_GUARDRAILS["version"]
-
-
-# Need this import here to avoid circular
-from pydantic import BaseModel  # noqa: E402
